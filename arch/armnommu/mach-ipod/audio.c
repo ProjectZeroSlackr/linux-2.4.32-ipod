@@ -896,10 +896,12 @@ static void ipodaudio_txdrain(void)
 	volatile int *w_off = (int *)DMA_WRITE_OFF;
 	volatile int *dma_active = (int *)DMA_ACTIVE;
 
+	/*
 	if (!*dma_active) {
 		printk(KERN_ERR "dma not active\n");
 		return;
 	}
+	*/
 
 	while (*r_off != *w_off) {
 		set_current_state(TASK_INTERRUPTIBLE);
