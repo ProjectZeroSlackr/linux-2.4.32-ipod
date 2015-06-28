@@ -32,7 +32,8 @@
 #define D2A_POWER_ON    3
 
 /* length of shared buffer in half-words (starting at DMA_BASE) */
-#define BUF_LEN		(40*1024)
+volatile int *dma_len = (int *) DMA_BUF_LEN;
+#define BUF_LEN (*dma_len)
 
 static int ipodaudio_isopen;
 // static int ipodaudio_power_state;
@@ -834,6 +835,7 @@ static int ipodaudio_open(struct inode *inode, struct file *filep)
 	}
 
 	/* initialise shared variables */
+	BUF_LEN = 40 * 1024;
 	*r_off = 0;
 	*w_off = 0;
 	*dma_active = 0;
@@ -1247,7 +1249,17 @@ static int ipodaudio_ioctl(struct inode *inode, struct file *filp, unsigned int 
 			put_user(BUF_LEN/2, (int *) arg);
 		}
 		break;
-
+	case SNDCTL_DSP_SETFRAGMENT:
+		rc = verify_area(VERIFY_READ, (void *) arg, sizeof(val));
+		if (rc == 0) {
+			get_user(val, (int *) arg);
+			if (val >= 128 && val <= 40*1024) {
+				ipodaudio_txdrain();
+				BUF_LEN = val;
+			}
+			put_user(BUF_LEN, (int *) arg);
+		}
+		break;	
 	case SNDCTL_DSP_SYNC:
 		rc = 0;
 		ipodaudio_txdrain();
@@ -1590,6 +1602,7 @@ static int __init ipodaudio_init(void)
 			SOUND_MAJOR, SND_DEV_DSP);
 		return 0;
 	}
+	BUF_LEN = 40 * 1024;
 
 	ipodaudio_hw_init();
 

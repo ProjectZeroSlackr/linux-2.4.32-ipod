@@ -30,8 +30,8 @@
 #define DMA_ACTIVE	0x4000000c
 #define DMA_STEREO	0x40000010
 #define DMA_HANDLER	(ipod_dma_handler_t *)0x40000014
-
-#define DMA_BASE	0x40000018
+#define DMA_BUF_LEN	0x40000018
+#define DMA_BASE	0x4000001c
 
 #define COP_HANDLER	(ipod_dma_handler_t *)0x4001501C
 #define COP_STATE	0x40015020
